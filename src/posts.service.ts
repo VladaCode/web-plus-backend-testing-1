@@ -8,9 +8,6 @@ export interface Post {
 
 @Injectable()
 export class PostsService {
-  findOne(arg0: string) {
-    throw new Error('Method not implemented.');
-  }
   private posts: Post[] = [];
   private lastPostId = 1;
 
@@ -22,7 +19,6 @@ export class PostsService {
     };
 
     this.lastPostId++;
-
     this.posts.push(postWithIdAndDate);
 
     return postWithIdAndDate;

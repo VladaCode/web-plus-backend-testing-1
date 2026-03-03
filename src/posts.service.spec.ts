@@ -1,31 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import { PostsService, Post } from './posts.service';
 
-export interface Post {
-  id: string;
-  text: string;
-  date: string;
-}
+describe('PostsService', () => {
+  let postsService: PostsService;
 
-@Injectable()
-export class PostsService {
-  private posts: Post[] = [];
-  private lastPostId = 1;
+  beforeEach(() => {
+    postsService = new PostsService();
+    // Добавляем один пост перед каждым тестом
+    postsService.create({ text: 'Some pre-existing post' });
+  });
 
-  create(post: Omit<Post, 'id' | 'date'>) {
-    const postWithIdAndDate: Post = {
-      ...post,
-      id: this.lastPostId.toString(),
-      date: new Date().toISOString(),
-    };
+  it('should add a new post', () => {
+    // Arrange
+    const newPostData = { text: 'New post' };
+    
+    // Act
+    const createdPost = postsService.create(newPostData);
+    
+    // Assert
+    expect(createdPost).toBeDefined();
+    expect(createdPost.id).toBeDefined();
+    expect(createdPost.date).toBeDefined();
+    expect(createdPost.text).toBe('New post');
+  });
 
-    this.lastPostId++;
-
-    this.posts.push(postWithIdAndDate);
-
-    return postWithIdAndDate;
-  }
-
-  find(postId: string) {
-    return this.posts.find(({ id }) => id === postId);
-  }
-}
+  it('should find a post', () => {
+    // Arrange - создаем новый пост
+    const newPost = postsService.create({ text: 'Post to find' });
+    
+    // Act
+    const found = postsService.find(newPost.id);
+    
+    // Assert
+    expect(found).toBeDefined();
+    expect(found?.text).toBe('Post to find');
+  });
+});
