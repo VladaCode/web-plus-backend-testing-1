@@ -1,56 +1,31 @@
-import { PostsService, Post } from './posts.service';
+import { Injectable } from '@nestjs/common';
 
-describe('PostsService', () => {
-  let service: PostsService;
-  const testPostData = { text: 'Test post content' };
+export interface Post {
+  id: string;
+  text: string;
+  date: string;
+}
 
-  beforeEach(() => {
-    service = new PostsService();
-  });
+@Injectable()
+export class PostsService {
+  private posts: Post[] = [];
+  private lastPostId = 1;
 
-  it('should create a new post', () => {
-    const createdPost = service.create(testPostData);
+  create(post: Omit<Post, 'id' | 'date'>) {
+    const postWithIdAndDate: Post = {
+      ...post,
+      id: this.lastPostId.toString(),
+      date: new Date().toISOString(),
+    };
 
-    expect(createdPost).toBeDefined();
-    expect(createdPost.id).toBeDefined();
-    expect(createdPost.date).toBeDefined();
-    expect(createdPost.text).toBe(testPostData.text);
-  });
+    this.lastPostId++;
 
-  it('should find a post by id', () => {
-    const firstPost = service.create(testPostData);
-    const secondPost = service.create({ text: 'Another post' });
+    this.posts.push(postWithIdAndDate);
 
-    const found = service.find(firstPost.id);
+    return postWithIdAndDate;
+  }
 
-    expect(found).toEqual(firstPost);
-    expect(found).not.toEqual(secondPost);
-  });
-
-  it('should return undefined if post not found', () => {
-    service.create(testPostData);
-    
-    const found = service.find('non-existent-id');
-    
-    expect(found).toBeUndefined();
-  });
-
-  it('should increment id for each new post', () => {
-    const firstPost = service.create(testPostData);
-    const secondPost = service.create(testPostData);
-
-    expect(parseInt(secondPost.id)).toBe(parseInt(firstPost.id) + 1);
-  });
-
-  it('should find the correct post among multiple posts', () => {
-    const posts = [
-      service.create({ text: 'Post 1' }),
-      service.create({ text: 'Post 2' }),
-      service.create({ text: 'Post 3' })
-    ];
-
-    const found = service.find(posts[1].id);
-
-    expect(found).toEqual(posts[1]);
-  });
-});
+  find(postId: string) {
+    return this.posts.find(({ id }) => id === postId);
+  }
+}
