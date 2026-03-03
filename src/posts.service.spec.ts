@@ -2,21 +2,15 @@ import { PostsService, Post } from './posts.service';
 
 describe('PostsService', () => {
   let service: PostsService;
-  
-  // Тестовые данные (без id и date, их добавит сервис)
-  const testPostData = {
-    text: 'Test post content'
-  };
+  const testPostData = { text: 'Test post content' };
 
   beforeEach(() => {
     service = new PostsService();
   });
 
   it('should create a new post', () => {
-    // Act
     const createdPost = service.create(testPostData);
 
-    // Assert
     expect(createdPost).toBeDefined();
     expect(createdPost.id).toBeDefined();
     expect(createdPost.date).toBeDefined();
@@ -24,30 +18,39 @@ describe('PostsService', () => {
   });
 
   it('should find a post by id', () => {
-    // Arrange - сначала создаем пост
-    const createdPost = service.create(testPostData);
+    const firstPost = service.create(testPostData);
+    const secondPost = service.create({ text: 'Another post' });
 
-    // Act
-    const found = service.find(createdPost.id);
+    const found = service.find(firstPost.id);
 
-    // Assert
-    expect(found).toEqual(createdPost);
+    expect(found).toEqual(firstPost);
+    expect(found).not.toEqual(secondPost);
   });
 
   it('should return undefined if post not found', () => {
-    // Act
+    service.create(testPostData);
+    
     const found = service.find('non-existent-id');
-
-    // Assert
+    
     expect(found).toBeUndefined();
   });
 
   it('should increment id for each new post', () => {
-    // Act
     const firstPost = service.create(testPostData);
     const secondPost = service.create(testPostData);
 
-    // Assert
-    expect(secondPost.id).toBe((parseInt(firstPost.id) + 1).toString());
+    expect(parseInt(secondPost.id)).toBe(parseInt(firstPost.id) + 1);
+  });
+
+  it('should find the correct post among multiple posts', () => {
+    const posts = [
+      service.create({ text: 'Post 1' }),
+      service.create({ text: 'Post 2' }),
+      service.create({ text: 'Post 3' })
+    ];
+
+    const found = service.find(posts[1].id);
+
+    expect(found).toEqual(posts[1]);
   });
 });
